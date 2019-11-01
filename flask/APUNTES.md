@@ -24,11 +24,14 @@ import flask
 
 app = flask.Flask(__name__)
 
+
 @app.route("/")
 def index():
-    return("hola nano!")
+    return "hola nanos2!"
 
-app.run()
+
+if __name__ == '__main__':
+    app.run(debug=True)
 EOM
 
 cat > app/requirements.txt <<- EOM
