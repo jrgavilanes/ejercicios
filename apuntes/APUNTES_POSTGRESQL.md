@@ -33,3 +33,11 @@ postgres=# create database mydb;
 postgres=# create user myuser with encrypted password 'mypass';
 postgres=# grant all privileges on database mydb to myuser;
 ```
+
+## Instalar aplicación pgAdmin III
+Crear conexión
+```
+host: localhost
+user: myuser
+pass: mypass
+```
