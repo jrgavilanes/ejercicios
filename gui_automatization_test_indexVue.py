@@ -2,28 +2,23 @@ import pyautogui
 import time
 import os
 
+# Esto es para obtener datos del clipboard.
+from tkinter import Tk
+root = Tk()
+root.withdraw()
 
+# Configuracion
 SEGUNDOS_CARGA_PAGINA = 1
+SEGUNDOS_MOVIMIENTO_RATON = 0.5
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+OFFSET_X, OFFSET_Y = (0, 0)
 
-# pyautogui.displayMousePosition() #Display real time mouse position.
-# print(pyautogui.size())
-# width, height = pyautogui.size()
-# mouse_position = pyautogui.position()
-# x, y = mouse_position
-# print(x,y)
-#pyautogui.moveTo(10,10, duration=1)
-# pyautogui.moveRel(200,0,1)
-# pyautogui.click(997,304)
-# pyautogui.doubleClick(997,304)
-# print(pyautogui.KEYBOARD_KEYS)
-# pyautogui.press("f1")
-# pyautogui.hotkey('ctrl','a')
+# pyautogui.displayMousePosition() # Utilidad Display real time mouse position.
 
 w, h = pyautogui.size()
 
 if not (w == 1920 and h == 1080):
-    print("Error: La resolución debe ser 1920x1080")
+    print("Error: LA RESOLUCION DEBE SER 1920x1080")
     exit(1)
 
 
@@ -31,64 +26,78 @@ def now():
     return time.strftime("%Y%m%d%H%M%S", time.gmtime())
 
 
-def pantallazo(nombre_test):
+def click(x, y):
+    pyautogui.moveTo(x+OFFSET_X, y+OFFSET_Y,
+                     duration=SEGUNDOS_MOVIMIENTO_RATON)
+    pyautogui.click(x+OFFSET_X, y+OFFSET_Y)
 
+
+def selecciona(x, y):
+    pyautogui.doubleClick(x+OFFSET_X, y+OFFSET_Y)
+    pyautogui.hotkey('ctrl', 'c')
+
+    return str(root.clipboard_get()).strip()
+
+
+def escribe(texto):
+    pyautogui.typewrite(texto, interval=0.1)
+
+
+def espera():
+    time.sleep(SEGUNDOS_CARGA_PAGINA)
+
+
+def tabula():
+    pyautogui.press("tab")
+
+
+def enter():
+    pyautogui.press("enter")
+
+
+def pantallazo(nombre_test):
     directorio = os.path.join(ROOT_DIR, "tests", nombre_test)
+
+    if not os.path.exists(directorio):
+        try:
+            os.makedirs(os.path.join(ROOT_DIR, "tests"))
+        except FileExistsError:
+            pass
+
+        os.makedirs(directorio)
+
     fichero = now() + "_" + nombre_test.upper() + ".png"
-    fichero = os.path.join(directorio, "resultado", fichero)
+    fichero = os.path.join(directorio, fichero)
 
     pyautogui.screenshot(fichero)
 
-def pru():
-    from tkinter import Tk
-    root = Tk()
-    root.withdraw()
-    
-    pyautogui.doubleClick(782,211)
-    pyautogui.hotkey('ctrl','c')
 
-    print("pues sale", root.clipboard_get())
+def test_login_ok():
 
-    pyautogui.doubleClick(782,316)
-    pyautogui.hotkey('ctrl','c')
+    if not (selecciona(311, 109) == "Control"):
+        print("ERROR: Debe estar en la pantalla de login, maximizado y al 100%")
+        exit(1)
 
-    x = root.clipboard_get()
-    
-    
-    print("y ahora", str(x).upper())
+    click(920, 264)  # Me posiciono en el campo usuario
+    escribe("juanra")
+    tabula()
+    escribe("juanra")
+    enter()
 
+    espera()
 
-
-def test_login():
-    
-    fichero = os.path.join(ROOT_DIR, "tests", "login", "control_de_acceso.png")
-    
-    # if not pyautogui.locateOnScreen(fichero):
-    #     print("Error: Debo estar posicionado en la pantalla de control de acceso y maximizado f11")
-    #     pantallazo("login")
-    #     exit(1)
-    
-    pyautogui.click(920, 264)   # Me posiciono en el campo usuario
-    pyautogui.typewrite("juanra", interval=0.1)
-    pyautogui.press("tab")      # Tabulo al campo password
-    pyautogui.typewrite("juanra", interval=0.1)
-    pyautogui.press("enter")
-
-    time.sleep(SEGUNDOS_CARGA_PAGINA)
-
-    fichero = os.path.join(ROOT_DIR, "tests", "login", "sesion_juanra.png")
-    
-    if pyautogui.locateOnScreen(fichero):
-        print("resultado OK")
+    if selecciona(1522, 162) == "Cerrar":
+        print("test OK: login_ok")
     else:
-        print("No va!! :'(")
+        print("TEST KO: login_ok")
 
-    pantallazo("login")
+    pantallazo("login_ok")
 
 
 def main():
-    # test_login()
-    pru()
+    test_login_ok()
+
+    root.destroy()  # objeto tk gui
 
     exit(0)
 
