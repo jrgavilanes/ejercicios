@@ -39,17 +39,36 @@ def pantallazo(nombre_test):
 
     pyautogui.screenshot(fichero)
 
+def pru():
+    from tkinter import Tk
+    root = Tk()
+    root.withdraw()
+    
+    pyautogui.doubleClick(782,211)
+    pyautogui.hotkey('ctrl','c')
+
+    print("pues sale", root.clipboard_get())
+
+    pyautogui.doubleClick(782,316)
+    pyautogui.hotkey('ctrl','c')
+
+    x = root.clipboard_get()
+    
+    
+    print("y ahora", str(x).upper())
+
+
 
 def test_login():
     
     fichero = os.path.join(ROOT_DIR, "tests", "login", "control_de_acceso.png")
     
-    if not pyautogui.locateOnScreen(fichero):
-        print("Error: Debo estar posicionado en la pantalla de control de acceso y maximizado f11")
-        pantallazo("login")
-        exit(1)
+    # if not pyautogui.locateOnScreen(fichero):
+    #     print("Error: Debo estar posicionado en la pantalla de control de acceso y maximizado f11")
+    #     pantallazo("login")
+    #     exit(1)
     
-    pyautogui.click(933, 303)   # Me posiciono en el campo usuario
+    pyautogui.click(920, 264)   # Me posiciono en el campo usuario
     pyautogui.typewrite("juanra", interval=0.1)
     pyautogui.press("tab")      # Tabulo al campo password
     pyautogui.typewrite("juanra", interval=0.1)
@@ -68,7 +87,8 @@ def test_login():
 
 
 def main():
-    test_login()
+    # test_login()
+    pru()
 
     exit(0)
 
