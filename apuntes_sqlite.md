@@ -15,27 +15,30 @@ https://sqlitestudio.pl/index.rvt
 
 ## SQL básicos
 
+Comandos básicos
+```
+$ sqlite3 db.sqlite
+sqlite> .header on
+sqlite> .mode column
+sqlite> select * from pasajeros;
+id          nombre      vuelo_id  
+----------  ----------  ----------
+3           juanra      2         
+
+```
+
 Crear y relacionar tablas
 ```
-CREATE TABLE vuelos (
-    id         INTEGER       PRIMARY KEY AUTOINCREMENT,
-    origen     VARCHAR (100) NOT NULL,
-    destino    VARCHAR (100) NOT NULL,
-    duracion   INTEGER       NOT NULL,
-    created_at DATE          DEFAULT (datetime('now', 'localtime') ),
-    updated_at DATE          DEFAULT (datetime('now', 'localtime') )
-);
+--
+-- File generated with SQLiteStudio v3.2.1 on vie. dic. 13 20:09:13 2019
+--
+-- Text encoding used: UTF-8
+--
+PRAGMA foreign_keys = off;
+BEGIN TRANSACTION;
 
-CREATE TRIGGER update_last_time <-- REVISAR
-     UPDATE OF origen,
-               destino,
-               duracion
-            ON vuelos
-BEGIN
-    UPDATE vuelos
-       SET updated_at = datetime('now', 'localtime') 
-     WHERE id = id;
-END;
+-- Table: pasajeros
+DROP TABLE IF EXISTS pasajeros;
 
 CREATE TABLE pasajeros (
     id       INTEGER       PRIMARY KEY AUTOINCREMENT,
@@ -43,6 +46,43 @@ CREATE TABLE pasajeros (
     vuelo_id INTEGER       REFERENCES vuelos (id) ON DELETE CASCADE
                                                   ON UPDATE CASCADE
 );
+
+INSERT INTO pasajeros (id, nombre, vuelo_id) VALUES (3, 'juanra', 2);
+
+-- Table: vuelos
+DROP TABLE IF EXISTS vuelos;
+
+CREATE TABLE vuelos (
+    id         INTEGER       PRIMARY KEY AUTOINCREMENT,
+    origen     VARCHAR (100) NOT NULL,
+    destino    VARCHAR (100) NOT NULL,
+    duracion   INTEGER       NOT NULL,
+    created_at DATE          DEFAULT (datetime('now', 'localtime') ),
+    updated_at DATE          DEFAULT (datetime('now', 'localtime') ) 
+);
+
+INSERT INTO vuelos (id, origen, destino, duracion, created_at, updated_at) VALUES (2, 'valencia', 'madrid', 30, '2019-12-13 19:44:07', '2019-12-13 19:44:07');
+INSERT INTO vuelos (id, origen, destino, duracion, created_at, updated_at) VALUES (3, 'valencia', 'madrid', 30, '2019-12-13 19:44:09', '2019-12-13 19:44:09');
+
+-- Trigger: vuelos_update_trigger
+DROP TRIGGER IF EXISTS vuelos_update_trigger;
+CREATE TRIGGER vuelos_update_trigger
+         AFTER UPDATE OF id,
+                         origen,
+                         destino,
+                         duracion
+            ON vuelos
+      FOR EACH ROW
+BEGIN
+    UPDATE vuelos
+       SET updated_at = datetime('now', 'localtime') 
+     WHERE id = new.id;
+END;
+
+
+COMMIT TRANSACTION;
+PRAGMA foreign_keys = on;
+
 ```
 ## Programa basico python y sqlite3
 
@@ -81,13 +121,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-# $ sqlite3 db.sqlite
-# sqlite> .header on
-# sqlite> .mode column
-# sqlite> select * from usuarios;
-# id          name      
-# ----------  ----------
-#             juanra    
-#             juanra    
 ```
