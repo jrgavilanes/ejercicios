@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>titulo</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/cosmo/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-qdQEsAI45WFCO5QwXBelBe1rR9Nwiss4rGEqiszC+9olH1ScrLrMQr1KmDR964uZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{url_for('static',filename='main.css')}}">
+
+</head>
+
+<body class="container">
+    <h1 class="display-4 title text-center mt-4">hola</h1>
+    <div class="row">
+        <div class="col-md-4 offset-md-4 my-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Nueva tarea</h2>
+                    <form action="/create-task" method="POST">
+                        <div class="form-group">
+                            <input class="form-control" type="text" name="tarea" id="tarea" placeholder="Tarea"
+                                autofocus>
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-block">Dale</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <h2>Listado de tareas</h2>
+                    <ul class="list-group">
+                        {% for t in tareas %}
+                            <li class="list-group-item {% if t.done %} done {% endif %}">
+                                <a href="/edit-task/{{t.id}}">{{ t.tarea }}</a>                                
+                                <a class="btn btn-success float-right" href="/delete-task/{{t.id}}">Borrar</a>                                
+                            </li>                        
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
