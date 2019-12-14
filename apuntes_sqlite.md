@@ -197,7 +197,8 @@ def main():
             exit(1)
 
     for i in range(1,100000):
-        qAux.execute(f"insert into usuarios (nombre, password) values('juanra{i}', 'clave{i}')")
+        # qAux.execute(f"insert into usuarios (nombre, password) values('juanra{i}', 'clave{i}')")
+        qAux.execute("insert into usuarios (nombre, password) values(?,?)",(f'juanra{i}', f'clave{i}') )
 
     qAux.execute("update usuarios set nombre = 'cambiado' where id=1")
 
@@ -213,7 +214,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
+    
 ```
