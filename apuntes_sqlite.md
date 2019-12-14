@@ -27,6 +27,70 @@ id          nombre      vuelo_id
 
 ```
 
+Cerrar
+```
+sqlite> .quit
+```
+
+Ver bases de datos activas
+```
+sqlite> .databases
+main: /home/janrax/Escritorio/db2.sqlite
+sqlite> 
+
+```
+
+Ver tablas disponibles
+```
+sqlite> .tables
+usuarios
+sqlite> .schema usuarios
+CREATE TABLE usuarios (
+    id         INTEGER       PRIMARY KEY AUTOINCREMENT,
+    nombre     VARCHAR (100) NOT NULL,
+    password   VARCHAR (100) NOT NULL,
+    created_at DATE          DEFAULT (datetime('now', 'localtime') ),
+    updated_at DATE          DEFAULT (datetime('now', 'localtime') ) 
+);
+```
+
+Exportar datos a csv
+```
+.mode csv
+.separator |
+.output usuarios.csv
+select * from usuarios;
+```
+
+Exportar datos como inserts
+```
+.mode insert nueva_tabla
+.output usuarios.sql
+select * from usuarios;
+```
+
+Exportar esquema completo
+```
+.output esquema_db.sql
+.schema
+```
+
+Exportar esquema de una tabla
+```
+.output esquema_usuarios.sql
+.schema usuarios
+```
+
+Backup de la base de datos
+```
+sqlite3 db.sqlite .dump > dump.sql
+```
+
+Restore
+```
+sqlite3 dbNueva.sqlite < dump.sql
+```
+
 Crear y relacionar tablas
 ```
 --
