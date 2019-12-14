@@ -9,7 +9,6 @@ db = SQLAlchemy(app)
 
 class Tarea(db.Model):
     __tablename__ = "tareas"
-
     id = db.Column(db.Integer, primary_key=True)
     tarea = db.Column(db.String(200))
     done = db.Column(db.Boolean, default=False)
@@ -18,6 +17,7 @@ class Tarea(db.Model):
 @app.route("/")
 def home():
     tareas = Tarea.query.all()
+
     return render_template("index.html", tareas=tareas)
 
 

@@ -32,9 +32,12 @@
                     <ul class="list-group">
                         {% for t in tareas %}
                             <li class="list-group-item {% if t.done %} done {% endif %}">
-                                <a href="/edit-task/{{t.id}}">{{ t.tarea }}</a>                                
-                                <a class="btn btn-success float-right" href="/delete-task/{{t.id}}">Borrar</a>                                
-                            </li>                        
+                                <a href="/edit-task/{{t.id}}">{{ t.tarea }}</a>
+                                
+                                <a class="btn btn-success float-right" href="/delete-task/{{t.id}}">Borrar</a>
+                                
+                            </li>
+                        
                         {% endfor %}
                     </ul>
                 </div>
