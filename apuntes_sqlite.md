@@ -90,6 +90,29 @@ PRAGMA foreign_keys = on;
 import sqlite3
 import os
 
+esquema_bd = """
+CREATE TABLE usuarios (
+    id         INTEGER       PRIMARY KEY AUTOINCREMENT,
+    nombre     VARCHAR (100) NOT NULL,
+    password   VARCHAR (100) NOT NULL,
+    created_at DATE          DEFAULT (datetime('now', 'localtime') ),
+    updated_at DATE          DEFAULT (datetime('now', 'localtime') ) 
+);
+"""
+
+trigger_db = """
+CREATE TRIGGER usuarios_update_trigger
+         AFTER UPDATE OF id,
+                         nombre,
+                         password
+            ON usuarios
+      FOR EACH ROW
+BEGIN
+    UPDATE usuarios
+       SET updated_at = datetime('now', 'localtime') 
+     WHERE id = new.id;
+END;
+"""
 
 def main():
 
@@ -102,23 +125,31 @@ def main():
     try:
         _ = qAux.execute("select * from usuarios").fetchone()
     except sqlite3.OperationalError as e:
-        if e == "no such table: usuarios":
-            qAux.execute("create table usuarios (id integer, name text)")
+        if str(e) == "no such table: usuarios":
+            qAux.execute(esquema_bd)
+            qAux.execute(trigger_db)
         else:
-            print("Error:",e)
+            print("Error:", e)
             exit(1)
-            
-    for _ in range(100000):
-        qAux.execute("insert into usuarios (name) values('juanra')")
+
+    for i in range(1,100000):
+        qAux.execute(f"insert into usuarios (nombre, password) values('juanra{i}', 'clave{i}')")
+
+    qAux.execute("update usuarios set nombre = 'cambiado' where id=1")
 
     db.commit()
 
+    id, nombre = qAux.execute("select id, nombre from usuarios").fetchone()
+    print(f"El primer registro es {id}: {nombre}")
+
     db.close()
 
-    print("au")
+    exit(0)
 
 
 if __name__ == "__main__":
     main()
+
+
 
 ```
