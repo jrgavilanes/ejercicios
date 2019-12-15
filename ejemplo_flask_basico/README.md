@@ -1,5 +1,7 @@
 # Notas
 
+Ejemplo que usa sqlAlchemy de forma básica SIN ORM.
+
 https://cs50.harvard.edu/web/notes/3/
 
 ## Instalación
