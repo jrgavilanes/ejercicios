@@ -10,6 +10,7 @@ autopep8 = "*"
 [packages]
 flask = "*"
 flask-sqlalchemy = "*"
+flask-session = "*"
 
 [requires]
 python_version = "3.6"

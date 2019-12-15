@@ -17,13 +17,12 @@ class Tarea(db.Model):
 @app.route("/")
 def home():
     tareas = Tarea.query.all()
-
     return render_template("index.html", tareas=tareas)
 
 
 @app.route("/create-task", methods=["POST"])
 def create():
-    tarea = Tarea(tarea=request.form["tarea"])
+    tarea = Tarea(tarea=request.form.get("tarea"))
     db.session.add(tarea)
     db.session.commit()
     return redirect(url_for("home"))
@@ -35,6 +34,7 @@ def update(id):
     tarea.done = not(tarea.done)
     db.session.commit()
     return redirect(url_for("home"))
+
 
 @app.route("/delete-task/<id>")
 def delete(id):
