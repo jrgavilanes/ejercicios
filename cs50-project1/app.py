@@ -1,9 +1,11 @@
 import os
+import secrets
 
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
 
 app = Flask(__name__)
 
@@ -19,17 +21,17 @@ active_sessions = {}
 
 @app.route("/")
 def home():
-    if session.get("user_id") is None:
+
+    if get_user_id() == -1:
         return redirect(url_for("login"))
 
-    else:
-        return redirect(url_for("main"))
+    return redirect(url_for("main"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        html_login="""
+        html_login = """
             <form action="/login" method="POST">
                 <input type="text" name="email" id="email" placeholder="email" autofocus>
                 <input type="password" name="password" id="password" placeholder="password">
@@ -37,7 +39,6 @@ def login():
             </form>
         """
         return html_login
-
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -49,12 +50,13 @@ def login():
             return redirect(url_for("login"))
 
         if user["email"] == email and user["password"] == password:
-            session["user_id"] = user["id"]
-            session["active_session"] = "bla bla bla"
-            db.execute("update usuarios set active_session= :active_session", {
-                       "active_session": "bla bla bla"})
+            token = secrets.token_urlsafe(16)
+            session["session-token"] = token
+            db.execute("update usuarios set active_session= :active_session where id = :id", {
+                       "active_session": token,
+                       "id": user["id"]})
             db.commit()
-            active_sessions[user["id"]] = "bla bla bla"
+            active_sessions[token] = user["id"]
             return redirect(url_for("home"))
         else:
             return redirect(url_for("login"))
@@ -67,14 +69,20 @@ def register():
 
 @app.route("/main", methods=["GET", "POST"])
 def main():
-    if session.get("user_id") is None:
+
+    id_usuario = get_user_id()
+    if id_usuario == -1:
         return redirect(url_for("login"))
 
-    if session.get("active_session") != active_sessions[session.get("user_id")]:
-        return redirect(url_for("login"))
+    return f"cositas wapas del usuario {id_usuario}"
 
-    return "cositas wapas de mi sesión"
 
+def get_user_id():
+
+    if session.get("session-token") is None:
+        return -1
+
+    return active_sessions.get(session.get("session-token"), -1)
 
 
 if __name__ == "__main__":
