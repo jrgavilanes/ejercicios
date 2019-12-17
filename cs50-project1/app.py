@@ -1,5 +1,7 @@
 import os
 import secrets
+import bcrypt
+
 
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_session import Session
@@ -37,19 +39,20 @@ def login():
                 <input type="password" name="password" id="password" placeholder="password">
                 <button type="submit">Acceder</button>
             </form>
+            <a href="/register">No tienes cuenta? Creáte una ya !</a>
         """
         return html_login
 
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        user = db.execute(" SELECT * FROM usuarios WHERE email = :email AND password = :password",
-                          {"email": email, "password": password}).fetchone()
+        user = db.execute(" SELECT * FROM usuarios WHERE email = :email",
+                          {"email": email}).fetchone()
 
         if user is None:
             return redirect(url_for("login"))
 
-        if user["email"] == email and user["password"] == password:
+        if user["email"] == email and bcrypt.checkpw(user["password"].encode(), password.encode()):
             token = secrets.token_urlsafe(16)
             session["session-token"] = token
             db.execute("update usuarios set active_session= :active_session where id = :id", {
@@ -62,9 +65,48 @@ def login():
             return redirect(url_for("login"))
 
 
-@app.route("/registrar", methods=["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    pass
+    if request.method == "GET":
+        html_register = """
+            <form action="/register" method="POST">
+                <input type="email" name="email" id="email" placeholder="email" autofocus required>
+                <input type="password" name="password" id="password" placeholder="password" required>
+                <input type="password" name="password1" id="password1" placeholder="repite password" required>
+                <button type="submit">Crear cuenta</button>
+            </form>
+        """
+        return html_register
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+        token = secrets.token_urlsafe(16)
+
+        db.execute("INSERT INTO usuarios (email,password,active_session) VALUES(:email, :password, :active_session)", {
+            "email": email,
+            "password": password,
+            "active_session": token
+        })
+
+        db.commit()
+
+        user = db.execute(" SELECT id FROM usuarios WHERE email = :email",
+                          {"email": email}).fetchone()
+
+        if not user is None:
+
+            session["session-token"] = token
+            active_sessions[token] = user["id"]
+
+            return redirect(url_for("home"))
+
+        else:
+
+            return redirect(url_for("register"))
 
 
 @app.route("/main", methods=["GET", "POST"])
