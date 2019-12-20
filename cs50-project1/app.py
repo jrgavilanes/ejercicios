@@ -113,8 +113,7 @@ def register():
 @app.route("/main", methods=["GET", "POST"])
 def main():
 
-    id_usuario = get_user_id()
-    if id_usuario == -1:
+    if get_user_id() == -1:
         return redirect(url_for("login"))
 
     return f"cositas wapas del usuario {id_usuario}<br><a href='/logout'>Salir</a>"
