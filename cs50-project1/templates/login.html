@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+Login
+{% endblock %}
+
+
+
+{% block body %}
+
+<h1 class="display-4 title text-center mt-4">Login</h1>
+<div class="row">
+
+    <div class="col-md-4 offset-md-4 my-auto">
+        {% if error_message%}
+        <div class="alert alert-warning mb-4 rounded" role="alert">
+            {{error_message}}
+        </div>
+        {% endif %}
+        <form action="{{url_for('login')}}" method="POST">
+            <div class="form-group">
+                <input class="form-control mb-2" type="email" name="email" id="email" placeholder="email" autofocus required>
+                <input class="form-control mb-2" type="password" name="password" id="password" placeholder="password"
+                    required>
+                <button class="btn btn-primary btn-block" type="submit">Acceder</button>
+            </div>
+        </form>
+        <br>
+        <div class="alert alert-info text-center" role="alert">
+            <a href="{{url_for('register')}}">No tienes cuenta? Creáte una ya !</a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
