@@ -108,16 +108,34 @@ def logout():
     
 
 
-@app.route("/main")
+@app.route("/main", methods=["GET", "POST"])
 def main():
 
     if get_user_id() is None:
         return redirect(url_for("login"))
 
     user_email = session["user-email"]
+    filtro = ""
 
-    libros = db.execute("SELECT * FROM libros LIMIT 20").fetchall()
-    return render_template("index.html", libros=libros, user_email=user_email)
+    if request.method == "GET":            
+        libros = db.execute("SELECT * FROM libros LIMIT 20").fetchall()
+        
+
+    if request.method == "POST":
+        filtro = request.form.get("query")
+        filtro = "%"+filtro+"%"
+
+        libros = db.execute("SELECT * FROM libros WHERE isbn LIKE :query OR titulo LIKE :query OR autor LIKE :query", {
+            "query": filtro            
+        }).fetchall()
+
+        filtro = filtro[1:-1]
+        
+
+    return render_template("index.html", libros=libros, user_email=user_email, filtro=filtro)
+          
+
+    
 
 
 def get_user_id():

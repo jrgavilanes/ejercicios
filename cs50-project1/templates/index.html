@@ -10,6 +10,7 @@ Principal
 
 
 {% block body %}
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">LibraKos</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -27,8 +28,8 @@ Principal
                 <a class="nav-link" href="{{url_for('logout')}}">Cerrar sesión <span class="sr-only">(current)</span></a>
             </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Buscar libros por título, autor o isbn" aria-label="Search">
+        <form class="form-inline my-2 my-lg-0" action="{{url_for('main')}}" method="POST">
+            <input class="form-control mr-sm-2" type="search" name="query" autofocus placeholder="Buscar libros por título, autor o isbn" aria-label="Search" value={{filtro}}>
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button>
         </form>
     </div>
@@ -43,10 +44,16 @@ Principal
             </div>
             <div class="card-body">                
                 <ul class="list-group">
+                    {% if libros|length == 0 %}
+                    <li class="list-group-item mb-4">
+                        <span class="titulo_libro">No hay resultados</span>                        
+                    </li>   
+                    {% endif%}
+                    
                     {% for libro in libros %}
-                    <li class="mb-4">
-                        <a href=""><span class="titulo_libro">{{ libro.titulo }}</span></a>
-                        <a class="btn btn-success float-right" href="">Borrar</a>
+                    <li class="list-group-item mb-4">
+                        <span class="titulo_libro">{{libro.isbn}}: {{ libro.titulo }} ({{libro.autor}})</span>
+                        <a class="btn btn-success float-right" href="">Ver más</a>
                     </li>
                     {% endfor %}
                 </ul>
