@@ -105,6 +105,8 @@ def logout():
         pass
     
     return redirect(url_for("login"))
+
+
     
 
 
@@ -135,7 +137,43 @@ def main():
     return render_template("index.html", libros=libros, user_email=user_email, filtro=filtro)
           
 
+@app.route("/book/<isbn>")
+def book(isbn):
+
+    if get_user_id() is None:
+        return redirect(url_for("login"))
+
+    user_email = session["user-email"]    
+
+    libro = db.execute("SELECT * FROM libros where isbn = :isbn", {"isbn": isbn}).fetchone()
+    comentarios = db.execute("SELECT * FROM comentarios, usuarios where usuarios.id=comentarios.id_usuario and isbn = :isbn", {"isbn": isbn}).fetchall()      
+
+    return render_template("book_detail.html", libro=libro, user_email=user_email, comentarios=comentarios)
     
+
+@app.route("/book/comment", methods=['POST'])
+def insert_comment():
+
+    if get_user_id() is None:
+        return redirect(url_for("login"))
+
+    user_email = session["user-email"]    
+
+    print("Llega:",get_user_id(),request.form.get("isbn"),request.form.get("comentario"),request.form.get("puntuacion") )
+
+    try:
+        db.execute("INSERT INTO `comentarios` (id_usuario, isbn, comentario, puntuacion) VALUES (:id_usuario, :isbn, :comentario, :puntuacion)", {
+            "id_usuario": get_user_id(),
+            "isbn": request.form.get("isbn"),
+            "comentario": request.form.get("comentario"),
+            "puntuacion": request.form.get("puntuacion")})
+        
+        db.commit()
+    except:
+        pass
+    
+
+    return redirect(url_for('book', isbn=request.form.get("isbn")))
 
 
 def get_user_id():

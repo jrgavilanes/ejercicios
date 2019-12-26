@@ -35,25 +35,42 @@ Principal
     </div>
 </nav>
 
-<h1 class="title text-center mt-6">Pantalla principal</h1>
+<h1 class="title text-center mt-6">Detalle del libro</h1>
 <div class="row">
     <div class="col-md-12  my-auto">
         <div class="card">
             <div class="card-header">
-                <h2>Listado de libros</h2>
+                <h3><b>Titulo:</b> {{libro.titulo}}</h3>
+                <h3><b>Autor:</b> {{libro.autor}}</h3>
+                <h3><b>Año de lanzamiento:</b> {{libro.anyo}}</h3>
             </div>
             <div class="card-body">                
                 <ul class="list-group">
-                    {% if libros|length == 0 %}
+                    {% if comentarios|length == 0 %}
                     <li class="list-group-item mb-4">
-                        <span class="titulo_libro">No hay resultados</span>                        
+                        <span class="titulo_libro">No hay comentarios todavía.</span>                        
                     </li>   
                     {% endif%}
+
+                    <form class="form-group" action="{{url_for('insert_comment')}}" method="POST">
+                        <input type="hidden" name="isbn" value="{{libro.isbn}}">
+                        Puntuación:
+                        <select class="form-control mb-2" name="puntuacion">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                          </select> 
+                        Comentarios:
+                        <textarea class="form-control mb-2" name="comentario" id="" cols="30" rows="10"></textarea>
+                        <input class="btn btn-primary" type="submit" value="Crear comentario">
+                        
+                    </form>
                     
-                    {% for libro in libros %}
+                    {% for comentario in comentarios %}
                     <li class="list-group-item mb-4">
-                        <span class="titulo_libro">{{libro.isbn}}: {{ libro.titulo }} ({{libro.autor}})</span>
-                        <a class="btn btn-success float-right" href="{{url_for('book', isbn=libro.isbn)}}">Ver más</a>
+                        <span class="titulo_libro">By {{comentario.email}}, Puntos: ({{comentario.puntuacion}})<br>{{ comentario.comentario }} </span>                        
                     </li>
                     {% endfor %}
                 </ul>
