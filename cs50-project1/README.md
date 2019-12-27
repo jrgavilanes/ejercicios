@@ -1,4 +1,19 @@
+# Proyecto 1 cs50
 
+## Enunciado del ejercicio
+https://docs.cs50.net/ocw/web/projects/1/project1.html
+
+
+## Arrancar entorno y ejecutar aplicación
+
+```bash
+cd cs50-project1
+pipenv shell
+pipenv install  # Si es la primera vez
+python app.py   # Arrancamos servidor de pruebas
+```
+
+## Esquema de la base de datos
 ```sql
 CREATE TABLE usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,4 +41,3 @@ CREATE TABLE comentarios (
     UNIQUE(id_usuario,isbn)
 );
 ```
-

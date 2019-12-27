@@ -43,6 +43,10 @@ Principal
                 <h3><b>Titulo:</b> {{libro.titulo}}</h3>
                 <h3><b>Autor:</b> {{libro.autor}}</h3>
                 <h3><b>Año de lanzamiento:</b> {{libro.anyo}}</h3>
+                {% if goodreads.average_rating != "" %}
+                <h2>GoodReads AVG Rating: {{goodreads.average_rating}}</h2>
+                <h2>GoodReads Rating Count: {{goodreads.ratings_count}}</h2>
+                {% endif %}
             </div>
             <div class="card-body">                
                 <ul class="list-group">
@@ -50,7 +54,7 @@ Principal
                     <li class="list-group-item mb-4">
                         <span class="titulo_libro">No hay comentarios todavía.</span>                        
                     </li>   
-                    {% endif%}
+                    {% endif %}
 
                     <form class="form-group" action="{{url_for('insert_comment')}}" method="POST">
                         <input type="hidden" name="isbn" value="{{libro.isbn}}">

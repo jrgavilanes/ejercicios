@@ -1,11 +1,14 @@
 import os
 import secrets
 import bcrypt
+import requests
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+GOODREADS_APIKEY = "ixvt0qDECZIn3AXpETLR2g"
 
 app = Flask(__name__)
 
@@ -17,7 +20,6 @@ engine = create_engine("sqlite:///database/db.sqlite")
 db = scoped_session(sessionmaker(bind=engine))
 
 active_sessions = {}
-
 
 @app.route("/")
 def home():
@@ -49,7 +51,7 @@ def login():
             error_message = "Usuario no válido"
             return render_template("login.html", error_message=error_message)
 
-        if user["email"] == email and bcrypt.checkpw(password.encode(),user["password"].encode()):
+        if user["email"] == email and bcrypt.checkpw(password.encode(), user["password"].encode()):
             token = secrets.token_urlsafe(16)
             session["session-token"] = token
             session["user-email"] = email
@@ -103,11 +105,8 @@ def logout():
         del active_sessions[session["session-token"]]
     except KeyError:
         pass
-    
+
     return redirect(url_for("login"))
-
-
-    
 
 
 @app.route("/main", methods=["GET", "POST"])
@@ -119,23 +118,21 @@ def main():
     user_email = session["user-email"]
     filtro = ""
 
-    if request.method == "GET":            
+    if request.method == "GET":
         libros = db.execute("SELECT * FROM libros LIMIT 20").fetchall()
-        
 
     if request.method == "POST":
         filtro = request.form.get("query")
         filtro = "%"+filtro+"%"
 
         libros = db.execute("SELECT * FROM libros WHERE isbn LIKE :query OR titulo LIKE :query OR autor LIKE :query", {
-            "query": filtro            
+            "query": filtro
         }).fetchall()
 
         filtro = filtro[1:-1]
-        
 
     return render_template("index.html", libros=libros, user_email=user_email, filtro=filtro)
-          
+
 
 @app.route("/book/<isbn>")
 def book(isbn):
@@ -143,13 +140,28 @@ def book(isbn):
     if get_user_id() is None:
         return redirect(url_for("login"))
 
-    user_email = session["user-email"]    
+    user_email = session["user-email"]
 
-    libro = db.execute("SELECT * FROM libros where isbn = :isbn", {"isbn": isbn}).fetchone()
-    comentarios = db.execute("SELECT * FROM comentarios, usuarios where usuarios.id=comentarios.id_usuario and isbn = :isbn", {"isbn": isbn}).fetchall()      
+    libro = db.execute(
+        "SELECT * FROM libros where isbn = :isbn", {"isbn": isbn}).fetchone()
+    comentarios = db.execute(
+        "SELECT * FROM comentarios, usuarios where usuarios.id=comentarios.id_usuario and isbn = :isbn", {"isbn": isbn}).fetchall()
 
-    return render_template("book_detail.html", libro=libro, user_email=user_email, comentarios=comentarios)
-    
+    g_reads = {}
+    g_reads["average_rating"] = ""
+    g_reads["ratings_count"] = ""
+
+    try:
+        goodreads = requests.get("https://www.goodreads.com/book/review_counts.json", params={
+            "key": GOODREADS_APIKEY,
+            "isbns": isbn}).json()
+        g_reads["average_rating"] = goodreads['books'][0]["average_rating"]
+        g_reads["ratings_count"] = goodreads['books'][0]["ratings_count"]
+    except:
+        pass
+
+    return render_template("book_detail.html", libro=libro, user_email=user_email, comentarios=comentarios, goodreads=g_reads)
+
 
 @app.route("/book/comment", methods=['POST'])
 def insert_comment():
@@ -157,9 +169,10 @@ def insert_comment():
     if get_user_id() is None:
         return redirect(url_for("login"))
 
-    user_email = session["user-email"]    
+    user_email = session["user-email"]
 
-    print("Llega:",get_user_id(),request.form.get("isbn"),request.form.get("comentario"),request.form.get("puntuacion") )
+    print("Llega:", get_user_id(), request.form.get("isbn"),
+          request.form.get("comentario"), request.form.get("puntuacion"))
 
     try:
         db.execute("INSERT INTO `comentarios` (id_usuario, isbn, comentario, puntuacion) VALUES (:id_usuario, :isbn, :comentario, :puntuacion)", {
@@ -167,13 +180,43 @@ def insert_comment():
             "isbn": request.form.get("isbn"),
             "comentario": request.form.get("comentario"),
             "puntuacion": request.form.get("puntuacion")})
-        
+
         db.commit()
     except:
         pass
-    
 
     return redirect(url_for('book', isbn=request.form.get("isbn")))
+
+
+
+@app.route("/api/<isbn>")
+def api(isbn):
+
+    # if get_user_id() is None:
+    #     return redirect(url_for("login"))
+
+    result = {}
+
+    libro = db.execute(
+        "SELECT isbn, titulo, autor, anyo FROM libros where isbn = :isbn", {"isbn": isbn}).fetchone()
+
+    if libro is None:
+        return jsonify(error=404, text="Libro no encontrado"), 404
+
+
+    result["isbn"], result["titulo"], result["autor"], result["año"] = libro
+
+        
+    suma, result["num_comentarios"] = db.execute(
+        "SELECT SUM(PUNTUACION) suma, COUNT(isbn) num_comentarios FROM comentarios WHERE isbn = :isbn;", {"isbn": isbn}).fetchone()
+
+     
+    if result["num_comentarios"] == 0:
+        result["puntuacion_media"] = "N/A"
+    else:
+        result["puntuacion_media"] = suma/result["num_comentarios"]
+
+    return jsonify(result)
 
 
 def get_user_id():
