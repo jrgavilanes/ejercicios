@@ -1,0 +1,27 @@
+{
+    "aplicaciones": {
+        "nombre_app1": {
+            "nombre": "nombre_app1",
+            "id": 1,
+            "activo": false
+        },
+        "nombre_app2": {
+            "nombre": "nombre_app2",
+            "id": 2,
+            "activo": false
+        }
+    },
+    "enrutador": {
+        "ficheros": {    
+            "coches": {
+                "nombre": "coches",
+                "patron": "coches",
+                "descripcion": "coches desc",
+                "aplicaciones": ["nombre_app2"],
+                "concatenar": false,
+                "apificar": false,
+                "estructura": {}
+            }        
+        }
+    }    
+}
