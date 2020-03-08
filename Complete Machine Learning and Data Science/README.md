@@ -68,6 +68,10 @@ $ conda remove --name myenv --all
 
 Es como poder hacer queries con ficheros csv.
 
+Mis practicas: 
+https://github.com/jrgavilanes/ejercicios/blob/master/Complete%20Machine%20Learning%20and%20Data%20Science/01%20Practicando%20con%20Pandas.ipynb
+
+Las soluciones buenas: 
 https://github.com/mrdbourke/zero-to-mastery-ml/blob/master/section-2-data-science-and-ml-tools/pandas-exercises-solutions.ipynb
 
 
